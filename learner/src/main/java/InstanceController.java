@@ -33,14 +33,14 @@ public class InstanceController implements RouterNanoHTTPD.UriResponder
         String[] errors = new String[textAnnotations.length];
 
         parseTextAnnotations(jInstances, textAnnotations, errors);
-        annotateInstances(annotator, textAnnotations, errors);
+        long[] runTimes = annotateInstances(annotator, textAnnotations, errors);
 
-        JsonArray newJInstances = serializeInstances(parser, textAnnotations, errors);
+        JsonArray newJInstances = serializeInstances(parser, textAnnotations, runTimes, errors);
 
         return NanoHTTPD.newFixedLengthResponse(newJInstances.toString());
     }
 
-    private JsonArray serializeInstances(JsonParser parser, TextAnnotation[] textAnnotations, String[] errors) {
+    private JsonArray serializeInstances(JsonParser parser, TextAnnotation[] textAnnotations, long[] runTimes, String[] errors) {
         JsonArray newJInstances = new JsonArray();
         for(int i=0;i<textAnnotations.length;i++){
             JsonObject instanceObject = new JsonObject();
@@ -49,6 +49,7 @@ public class InstanceController implements RouterNanoHTTPD.UriResponder
                 String jsonTextAnnotation = SerializationHelper.serializeToJson(textAnnotations[i]);
                 JsonObject jTextAnnotation = parser.parse(jsonTextAnnotation).getAsJsonObject();
                 instanceObject.add("textAnnotation", jTextAnnotation);
+                instanceObject.add("runTime", new JsonPrimitive(runTimes[i]));
             }
             if(errors[i] != null){
                 instanceObject.add("error", new JsonPrimitive(errors[i]));
@@ -58,17 +59,22 @@ public class InstanceController implements RouterNanoHTTPD.UriResponder
         return newJInstances;
     }
 
-    private void annotateInstances(Annotator annotator, TextAnnotation[] textAnnotations, String[] errors) {
+    private long[] annotateInstances(Annotator annotator, TextAnnotation[] textAnnotations, String[] errors) {
+        long[] runTimes = new long[textAnnotations.length];
         for(int i=0;i<textAnnotations.length;i++) {
             if (textAnnotations[i] != null){
                 try{
+                    long startTime = System.currentTimeMillis();
                     annotator.addView(textAnnotations[i]);
+                    long endTime = System.currentTimeMillis();
+                    runTimes[i] = endTime - startTime;
                 } catch (AnnotatorException e) {
                     textAnnotations[i] = null;
                     errors[i] = String.format("There was an error adding the view to the instance: %s", e.toString());
                 }
             }
         }
+        return runTimes;
     }
 
     private void parseTextAnnotations(JsonArray jInstances, TextAnnotation[] textAnnotations, String[] errors) {
