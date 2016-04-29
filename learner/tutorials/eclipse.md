@@ -118,7 +118,7 @@ You can press enter in the terminal to end the program.
 
 ## Part 5: Run the learner endpoint with the Open Eval system
 
-Start your learner endpoint. Open a browser and go to the Open Eval site. Log in or create an account if needed. Create a configuration with your desired dataset and task. For our example it is "500" and "POS". 
+Start your learner endpoint. Open a browser and go to the Open Eval site. Log in or create an account if needed. Create a configuration with your desired dataset and task. For our example it is "test-10.br" and "POS". 
 
 On the configurations page click the "Run" button. Enter in the URL printed by the learner endpoint. Please note, in order to use the Open Eval system, the server must be on the same network as your learner endpoint. This can be achived through a vpn. If you are using a vpn the URL printed out might not be accurate. In this case run ipconfig on windows or ifconfig on mac/linux and find your vpn ip address. In the create run form enter in your url in the following format: http://{ip}:{port}/.
 
